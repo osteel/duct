@@ -1,0 +1,21 @@
+#!/usr/bin/env php
+<?php
+
+$root = dirname(__DIR__);
+
+if (! is_file($root . '/vendor/autoload.php')) {
+    $root = dirname(__DIR__, 4);
+}
+
+require $root . '/vendor/autoload.php';
+
+use Osteel\Duct\Commands\Treat;
+use Symfony\Component\Console\Application;
+
+$application = new Application();
+
+$treat = new Treat();
+$application->add($treat);
+$application->setDefaultCommand($treat->getName());
+
+$application->run();

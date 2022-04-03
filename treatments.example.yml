@@ -1,0 +1,12 @@
+treatments:
+
+  photos:
+    sieves:
+      convert:
+        options:
+          - from:heic
+          - to:jpeg
+      rename:
+        options:
+          - format:jpeg
+          - pattern:DATE_TIME_ORIGINAL
