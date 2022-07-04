@@ -1,6 +1,6 @@
 {
     "name": "osteel/duct",
-    "description": "File processor written in PHP",
+    "description": "File processor made with PHP",
     "type": "library",
     "license": "MIT",
     "autoload": {
@@ -21,12 +21,14 @@
     ],
     "minimum-stability": "stable",
     "require": {
-        "php": "^7.4|^8.0",
+        "php": "^8.0",
+        "ext-imagick": "*",
         "symfony/console": "^6.0",
-        "illuminate/collections": "^9.6",
+        "illuminate/collections": "^9.0",
         "symfony/yaml": "^6.0",
-        "vlucas/phpdotenv": "^5.4",
-        "illuminate/support": "^9.6"
+        "vlucas/phpdotenv": "^5.0",
+        "illuminate/support": "^9.0",
+        "intervention/image": "^2.0"
     },
     "scripts": {
         "test": "phpunit",

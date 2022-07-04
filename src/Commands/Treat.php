@@ -2,10 +2,12 @@
 
 namespace Osteel\Duct\Commands;
 
+use Osteel\Duct\Services\Plumber;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
+use Throwable;
 
 class Treat extends Command
 {
@@ -21,7 +23,7 @@ class Treat extends Command
      *
      * @var string
      */
-    protected static $defaultDescription = 'Applies a treatment to a directory.';
+    protected static $defaultDescription = 'Applies a treatment to a directory';
 
     /**
      * Configure the command.
@@ -44,6 +46,17 @@ class Treat extends Command
      */
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
+        $treatment = $input->getArgument('treatment');
+        $directory = $input->getArgument('directory');
+        $recursive = (bool) $input->getOption('recursive');
+
+        //try {
+            $plumber = new Plumber();
+            $plumber->apply($treatment, $directory, $recursive);
+        /*} catch (Throwable $exception) {
+            return Command::FAILURE;
+        }*/
+
         return Command::SUCCESS;
     }
 }

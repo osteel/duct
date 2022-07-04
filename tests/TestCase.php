@@ -2,6 +2,8 @@
 
 namespace Osteel\Duct\Tests;
 
-abstract class TestCase extends \PHPUnit\Framework\TestCase
+use PHPUnit\Framework\TestCase;
+
+abstract class TestCase extends TestCase
 {
 }

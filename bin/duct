@@ -14,8 +14,6 @@ use Symfony\Component\Console\Application;
 
 $application = new Application();
 
-$treat = new Treat();
-$application->add($treat);
-$application->setDefaultCommand($treat->getName());
+$application->add(new Treat());
 
 $application->run();
