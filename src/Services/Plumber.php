@@ -6,8 +6,10 @@ use DirectoryIterator;
 use Dotenv\Dotenv;
 use Dotenv\Exception\ExceptionInterface;
 use Illuminate\Support\Collection;
+use IteratorIterator;
 use Osteel\Duct\Sieves\Sieve;
 use RecursiveDirectoryIterator;
+use RecursiveIteratorIterator;
 use Symfony\Component\Yaml\Exception\ParseException;
 use Symfony\Component\Yaml\Yaml;
 
@@ -17,8 +19,8 @@ class Plumber
     {
         // @TODO better exception handling
         $directory = $recursive
-            ? new RecursiveDirectoryIterator($directoryPath)
-            : new DirectoryIterator($directoryPath);
+            ? new RecursiveIteratorIterator(new RecursiveDirectoryIterator($directoryPath))
+            : new IteratorIterator(new DirectoryIterator($directoryPath));
 
         $this->load($treatment)->each(fn (Sieve $sieve) => $sieve->process($directory));
     }

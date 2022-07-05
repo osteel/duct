@@ -6,6 +6,7 @@ use Osteel\Duct\Services\Plumber;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
+use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 use Throwable;
 
@@ -34,7 +35,7 @@ class Treat extends Command
     {
         $this->addArgument('treatment', InputArgument::REQUIRED, 'The treatment');
         $this->addArgument('directory', InputArgument::REQUIRED, 'The directory');
-        $this->addOption('recursive', 'r', InputArgument::OPTIONAL, 'Apply the treatment recursively');
+        $this->addOption('recursive', 'r', InputOption::VALUE_NONE, 'Apply the treatment recursively');
     }
 
     /**
