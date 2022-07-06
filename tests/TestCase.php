@@ -2,8 +2,8 @@
 
 namespace Osteel\Duct\Tests;
 
-use PHPUnit\Framework\TestCase;
+use PHPUnit\Framework\TestCase as BaseTestCase;
 
-abstract class TestCase extends TestCase
+abstract class TestCase extends BaseTestCase
 {
 }

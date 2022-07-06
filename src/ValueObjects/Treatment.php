@@ -1,31 +1,21 @@
 <?php
 
-namespace Osteel\Duct\Services;
+namespace Osteel\Duct\ValueObjects;
 
-use DirectoryIterator;
 use Dotenv\Dotenv;
 use Dotenv\Exception\ExceptionInterface;
 use Illuminate\Support\Collection;
-use IteratorIterator;
 use Osteel\Duct\Sieves\Sieve;
-use RecursiveDirectoryIterator;
-use RecursiveIteratorIterator;
 use Symfony\Component\Yaml\Exception\ParseException;
 use Symfony\Component\Yaml\Yaml;
 
-class Plumber
+final class Treatment
 {
-    public function apply(string $treatment, string $directoryPath, bool $recursive = false): void
+    private function __construct(public readonly Collection $sieves)
     {
-        // @TODO better exception handling
-        $directory = $recursive
-            ? new RecursiveIteratorIterator(new RecursiveDirectoryIterator($directoryPath))
-            : new IteratorIterator(new DirectoryIterator($directoryPath));
-
-        $this->load($treatment)->each(fn (Sieve $sieve) => $sieve->process($directory));
     }
 
-    private function load(string $treatment): Collection
+    public static function make(string $treatment): Treatment
     {
         try {
             $config = Dotenv::createImmutable(sprintf('%s/../../config', __DIR__));
@@ -44,7 +34,9 @@ class Plumber
             // @TODO do something
         }
 
-        return Collection::make($yaml['treatments'][$treatment])
+        $sieves = Collection::make($yaml['treatments'][$treatment])
             ->map(fn (array $parameters, string $key) => Sieve::make($key, $parameters));
+
+        return new Treatment($sieves);
     }
 }

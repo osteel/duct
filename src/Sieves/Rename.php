@@ -6,9 +6,8 @@ use DateTime;
 use Exception;
 use Illuminate\Support\Str;
 use Intervention\Image\ImageManager;
-use IteratorIterator;
 use Osteel\Duct\Sieves\Utils\ExtensionFilter;
-use RecursiveIteratorIterator;
+use Osteel\Duct\ValueObjects\Directory;
 use SplFileInfo;
 
 class Rename extends Sieve
@@ -23,9 +22,9 @@ class Rename extends Sieve
         $this->pattern = $options['pattern'];
     }
 
-    public function process(IteratorIterator | RecursiveIteratorIterator $directory): void
+    public function filter(Directory $directory): void
     {
-        $filtered = new ExtensionFilter($directory, $this->types);
+        $filtered = new ExtensionFilter($directory->iterator, $this->types);
         $manager  = new ImageManager(['driver' => 'imagick']);
 
         // @TODO handle this better

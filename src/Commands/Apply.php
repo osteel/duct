@@ -2,7 +2,10 @@
 
 namespace Osteel\Duct\Commands;
 
-use Osteel\Duct\Services\Plumber;
+use Osteel\Duct\Services\Interpreter;
+use Osteel\Duct\Sieves\Sieve;
+use Osteel\Duct\ValueObjects\Directory;
+use Osteel\Duct\ValueObjects\Treatment;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
@@ -10,14 +13,14 @@ use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 use Throwable;
 
-class Treat extends Command
+class Apply extends Command
 {
     /**
      * The name of the command (the part after "bin/duct").
      *
      * @var string
      */
-    protected static $defaultName = 'treat';
+    protected static $defaultName = 'apply';
 
     /**
      * The command description shown when running "php bin/duct list".
@@ -47,16 +50,18 @@ class Treat extends Command
      */
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
-        $treatment = $input->getArgument('treatment');
-        $directory = $input->getArgument('directory');
-        $recursive = (bool) $input->getOption('recursive');
+        $interpreter = new Interpreter($input, $output);
 
-        //try {
-            $plumber = new Plumber();
-            $plumber->apply($treatment, $directory, $recursive);
-        /*} catch (Throwable $exception) {
+        try {
+            $treatment = Treatment::make($input->getArgument('treatment'));
+            $directory = Directory::make($input->getArgument('directory'), (bool) $input->getOption('recursive'));
+
+            $treatment->sieves->each(fn (Sieve $sieve) => $sieve->filter($directory));
+        } catch (Throwable $exception) {
+            $interpreter->error($exception->getMessage());
+
             return Command::FAILURE;
-        }*/
+        }
 
         return Command::SUCCESS;
     }

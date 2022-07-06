@@ -21,7 +21,7 @@
     ],
     "minimum-stability": "stable",
     "require": {
-        "php": "^8.0",
+        "php": "^8.1",
         "ext-imagick": "*",
         "symfony/console": "^6.0",
         "illuminate/collections": "^9.0",

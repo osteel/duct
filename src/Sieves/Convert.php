@@ -4,9 +4,8 @@ namespace Osteel\Duct\Sieves;
 
 use Exception;
 use Intervention\Image\ImageManager;
-use IteratorIterator;
 use Osteel\Duct\Sieves\Utils\ExtensionFilter;
-use RecursiveIteratorIterator;
+use Osteel\Duct\ValueObjects\Directory;
 use SplFileInfo;
 
 class Convert extends Sieve
@@ -18,12 +17,12 @@ class Convert extends Sieve
     {
         // @TODO check that the right options are provided and that the formats are supported
         $this->from = $options['from'];
-        $this->to 	= $options['to'];
+        $this->to   = $options['to'];
     }
 
-    public function process(IteratorIterator | RecursiveIteratorIterator $directory): void
+    public function filter(Directory $directory): void
     {
-        $filtered = new ExtensionFilter($directory, [$this->from]);
+        $filtered = new ExtensionFilter($directory->iterator, [$this->from]);
         $manager  = new ImageManager(['driver' => 'imagick']);
 
         /** @var SplFileInfo */
