@@ -28,7 +28,8 @@
         "symfony/yaml": "^6.0",
         "vlucas/phpdotenv": "^5.0",
         "illuminate/support": "^9.0",
-        "intervention/image": "^2.0"
+        "intervention/image": "^2.0",
+        "symfony/process": "^6.1"
     },
     "scripts": {
         "test": "phpunit",

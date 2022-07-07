@@ -2,9 +2,9 @@
 
 namespace Osteel\Duct\ValueObjects;
 
-use Dotenv\Dotenv;
-use Dotenv\Exception\ExceptionInterface;
+use Exception;
 use Illuminate\Support\Collection;
+use Osteel\Duct\Services\Configurator\Configurator;
 use Osteel\Duct\Sieves\Sieve;
 use Symfony\Component\Yaml\Exception\ParseException;
 use Symfony\Component\Yaml\Yaml;
@@ -17,15 +17,10 @@ final class Treatment
 
     public static function make(string $treatment): Treatment
     {
-        try {
-            $config = Dotenv::createImmutable(sprintf('%s/../../config', __DIR__));
-            $config->load();
-        } catch (ExceptionInterface) {
-            // @TODO run config command instead
-        }
+        $configurator = new Configurator();
 
         try {
-            $yaml = Yaml::parseFile($_ENV['TREATMENTS_FILE']);
+            $yaml = Yaml::parseFile($configurator->load('TREATMENTS_LOCATION'));
         } catch (ParseException) {
             // @TODO do something
         }

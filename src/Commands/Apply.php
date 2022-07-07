@@ -2,6 +2,7 @@
 
 namespace Osteel\Duct\Commands;
 
+use Osteel\Duct\Services\Configurator\Exceptions\MissingConfiguration;
 use Osteel\Duct\Services\Interpreter;
 use Osteel\Duct\Sieves\Sieve;
 use Osteel\Duct\ValueObjects\Directory;
@@ -57,6 +58,10 @@ class Apply extends Command
             $directory = Directory::make($input->getArgument('directory'), (bool) $input->getOption('recursive'));
 
             $treatment->sieves->each(fn (Sieve $sieve) => $sieve->filter($directory));
+        } catch (MissingConfiguration $exception) {
+            $interpreter->error('Please run "duct config"');
+
+            return Command::FAILURE;
         } catch (Throwable $exception) {
             $interpreter->error($exception->getMessage());
 

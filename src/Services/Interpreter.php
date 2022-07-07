@@ -7,6 +7,14 @@ use Symfony\Component\Console\Style\SymfonyStyle;
 class Interpreter extends SymfonyStyle
 {
     /**
+     * Ask a question and return the input value.
+     */
+    public function question(string $question, ?string $default = null): string
+    {
+        return $this->ask(sprintf(' ✍️  %s', $question), $default);
+    }
+
+    /**
      * {@inheritdoc}
      *
      * @param  string $message
