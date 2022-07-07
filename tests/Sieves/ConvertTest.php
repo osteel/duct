@@ -35,7 +35,7 @@ class ConvertTest extends TestCase
     {
         $sieve       = new Convert(['from' => $from, 'to' => $to]);
         $source      = sprintf('%s/../data/img/%s', __DIR__, $from);
-        $destination = sprintf('%s/../data/convert', __DIR__);
+        $destination = sprintf('%s/../data/tmp/convert', __DIR__);
 
         $this->cpdir($source, $destination);
 

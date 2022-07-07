@@ -17,7 +17,7 @@ abstract class TestCase extends BaseTestCase
             $this->rmdir($destination);
         }
 
-        mkdir($destination);
+        mkdir($destination, recursive: true);
 
         $directory = new IteratorIterator(new DirectoryIterator($source));
 
@@ -30,7 +30,6 @@ abstract class TestCase extends BaseTestCase
             $filename = sprintf('%s/%s', $destination, $file->getFilename());
 
             copy($file->getPathname(), $filename);
-            chmod($filename, 777);
         }
     }
 

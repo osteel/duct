@@ -46,20 +46,32 @@ class Rename extends Sieve
                 $filename = (new DateTime($filename))->format($format);
             }
 
-            $path = sprintf('%s/%s.%s', $file->getPath(), $filename, $file->getExtension());
-
-            // Already the right name.
-            if ($path === $file->getPathname()) {
-                continue;
-            }
-
-            // @TODO handle this better
-            if (file_exists($path)) {
-                throw new Exception('File already exists');
-            }
-
             // @TODO handle exceptions
-            rename($file->getPathname(), $path);
+            rename($file->getPathname(), $this->generateUniquePath($file, $filename));
         }
+    }
+
+    private function generateUniquePath(SplFileInfo $file, string $filename): string
+    {
+        $withoutExtension = sprintf('%s/%s', $file->getPath(), $filename);
+        $path             = sprintf('%s.%s', $withoutExtension, $file->getExtension());
+
+        // Already the right path.
+        if ($path === $file->getPathname()) {
+            return $path;
+        }
+
+        $counter = 0;
+        $attempt = $path;
+
+        while (file_exists($attempt)) {
+            $attempt = sprintf('%s (%s).%s', $withoutExtension, ++$counter, $file->getExtension());
+            // Already the right path.
+            if ($attempt === $file->getPathname()) {
+                return $attempt;
+            }
+        }
+
+        return $attempt;
     }
 }
