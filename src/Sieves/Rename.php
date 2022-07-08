@@ -48,7 +48,7 @@ class Rename extends Sieve
         foreach ($filtered as $file) {
             // @TODO handle this better
             if (empty($filename = $manager->make($file->getPathname())->exif(Str::studly(strtolower($exif))))) {
-                throw new Exception('Exif not available');
+                continue;
             }
 
             // @TODO handle exceptions
