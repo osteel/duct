@@ -4,10 +4,20 @@ namespace Osteel\Duct\Tests\Sieves;
 
 use DirectoryIterator;
 use IteratorIterator;
+use Osteel\Duct\Services\Interpreter;
 use Osteel\Duct\Tests\TestCase as BaseTestCase;
 
 abstract class TestCase extends BaseTestCase
 {
+    protected Interpreter $interpreter;
+
+    protected function setUp(): void
+    {
+        parent::setUp();
+
+        $this->interpreter = $this->createMock(Interpreter::class);
+    }
+
     /**
      * Copy a directory and its content.
      */

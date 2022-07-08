@@ -8,6 +8,7 @@ use Illuminate\Support\Str;
 use Intervention\Image\ImageManager;
 use Osteel\Duct\Services\Interpreter;
 use Osteel\Duct\Sieves\Utils\ExtensionFilter;
+use Osteel\Duct\Sieves\Utils\PathGenerator;
 use Osteel\Duct\ValueObjects\Directory;
 use SplFileInfo;
 
@@ -25,8 +26,9 @@ class Rename extends Sieve
 
     public function filter(Directory $directory): int
     {
-        $filtered = new ExtensionFilter($directory->iterator, $this->types);
-        $manager  = new ImageManager(['driver' => 'imagick']);
+        $filtered  = new ExtensionFilter($directory->iterator, $this->types);
+        $manager   = new ImageManager(['driver' => 'imagick']);
+        $generator = new PathGenerator();
 
         if (($count = iterator_count($filtered)) === 0) {
             return $count;
@@ -54,8 +56,10 @@ class Rename extends Sieve
                 $filename = (new DateTime($filename))->format($format);
             }
 
+            $path = $generator->uniquePath($file->getPath(), $filename, $file->getExtension(), $file->getPathname());
+
             // @TODO handle exceptions
-            rename($file->getPathname(), $this->generateUniquePath($file, $filename));
+            rename($file->getPathname(), $path);
 
             $this->interpreter->progressAdvance();
         }
@@ -63,29 +67,5 @@ class Rename extends Sieve
         $this->interpreter->progressFinish();
 
         return $count;
-    }
-
-    private function generateUniquePath(SplFileInfo $file, string $filename): string
-    {
-        $withoutExtension = sprintf('%s/%s', $file->getPath(), $filename);
-        $path             = sprintf('%s.%s', $withoutExtension, $file->getExtension());
-
-        // Already the right path.
-        if ($path === $file->getPathname()) {
-            return $path;
-        }
-
-        $counter = 0;
-        $attempt = $path;
-
-        while (file_exists($attempt)) {
-            $attempt = sprintf('%s (%s).%s', $withoutExtension, ++$counter, $file->getExtension());
-            // Already the right path.
-            if ($attempt === $file->getPathname()) {
-                return $attempt;
-            }
-        }
-
-        return $attempt;
     }
 }

@@ -42,7 +42,7 @@ class RenameTest extends TestCase
      */
     public function testItRenamesTheFiles(string $exif, ?string $format = null)
     {
-        $sieve       = new Rename(['types' => ['jpg'], 'pattern' => $exif . ($format ? ':' . $format : '')]);
+        $sieve       = new Rename($this->interpreter, ['types' => ['jpg'], 'pattern' => $exif . ($format ? ':' . $format : '')]);
         $source      = sprintf('%s/../data/img/jpg', __DIR__);
         $destination = sprintf('%s/../data/tmp/rename', __DIR__);
 
@@ -61,7 +61,7 @@ class RenameTest extends TestCase
 
     public function testItHandlesPathConflicts()
     {
-        $sieve       = new Rename(['types' => ['jpg'], 'pattern' => 'DATE_TIME_ORIGINAL:Y-m-d']);
+        $sieve       = new Rename($this->interpreter, ['types' => ['jpg'], 'pattern' => 'DATE_TIME_ORIGINAL:Y-m-d']);
         $source      = sprintf('%s/../data/img/jpg', __DIR__);
         $destination = sprintf('%s/../data/tmp/rename', __DIR__);
 

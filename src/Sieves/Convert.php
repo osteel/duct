@@ -2,10 +2,10 @@
 
 namespace Osteel\Duct\Sieves;
 
-use Exception;
 use Intervention\Image\ImageManager;
 use Osteel\Duct\Services\Interpreter;
 use Osteel\Duct\Sieves\Utils\ExtensionFilter;
+use Osteel\Duct\Sieves\Utils\PathGenerator;
 use Osteel\Duct\ValueObjects\Directory;
 use SplFileInfo;
 
@@ -25,6 +25,7 @@ class Convert extends Sieve
     {
         $filtered = new ExtensionFilter($directory->iterator, [$this->from]);
         $manager  = new ImageManager(['driver' => 'imagick']);
+        $generator = new PathGenerator();
 
         if (($count = iterator_count($filtered)) === 0) {
             return $count;
@@ -35,12 +36,7 @@ class Convert extends Sieve
 
         /** @var SplFileInfo */
         foreach ($filtered as $file) {
-            $path = sprintf('%s/%s.%s', $file->getPath(), pathinfo($file->getFilename(), PATHINFO_FILENAME), $this->to);
-
-            // @TODO handle this better
-            if (file_exists($path)) {
-                throw new Exception('File already exists');
-            }
+            $path = $generator->uniquePath($file->getPath(), pathinfo($file->getFilename(), PATHINFO_FILENAME), $this->to);
 
             // @TODO handle exceptions
             $manager->make($file->getPathname())->save($path);
