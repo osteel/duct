@@ -2,9 +2,9 @@
 
 namespace Osteel\Duct\ValueObjects;
 
-use Exception;
 use Illuminate\Support\Collection;
 use Osteel\Duct\Services\Configurator\Configurator;
+use Osteel\Duct\Services\Interpreter;
 use Osteel\Duct\Sieves\Sieve;
 use Symfony\Component\Yaml\Exception\ParseException;
 use Symfony\Component\Yaml\Yaml;
@@ -15,7 +15,7 @@ final class Treatment
     {
     }
 
-    public static function make(string $treatment): Treatment
+    public static function make(string $treatment, Interpreter $interpreter): Treatment
     {
         $configurator = new Configurator();
 
@@ -30,7 +30,7 @@ final class Treatment
         }
 
         $sieves = Collection::make($yaml['treatments'][$treatment])
-            ->map(fn (array $parameters, string $key) => Sieve::make($key, $parameters));
+            ->map(fn (array $options, string $key) => Sieve::make($key, $interpreter, $options));
 
         return new Treatment($sieves);
     }

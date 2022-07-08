@@ -54,10 +54,18 @@ class Apply extends Command
         $interpreter = new Interpreter($input, $output);
 
         try {
-            $treatment = Treatment::make($input->getArgument('treatment'));
+            $treatment = Treatment::make($input->getArgument('treatment'), $interpreter);
             $directory = Directory::make($input->getArgument('directory'), (bool) $input->getOption('recursive'));
 
-            $treatment->sieves->each(fn (Sieve $sieve) => $sieve->filter($directory));
+            $treatment->sieves->each(function (Sieve $sieve) use ($directory, $interpreter) {
+                $class = explode('\\', $sieve::class);
+
+                $interpreter->work(sprintf('Applying sieve %s...', array_pop($class)));
+
+                $count = $sieve->filter($directory);
+
+                $interpreter->success(sprintf('%s files successfully processed!', $count));
+            });
         } catch (MissingConfiguration $exception) {
             $interpreter->error('Please run "duct config"');
 

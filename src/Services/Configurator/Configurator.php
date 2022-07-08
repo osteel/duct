@@ -38,6 +38,9 @@ class Configurator
         return $_ENV[$key] ?? throw new MissingConfiguration(sprintf('Key %s is undefined', $key));
     }
 
+    /**
+     * Save a configuration value.
+     */
     public function save(string $key, string $value): void
     {
         $stream = fopen($this->getFilePath(), 'a');
