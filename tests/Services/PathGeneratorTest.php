@@ -1,8 +1,8 @@
 <?php
 
-namespace Osteel\Duct\Tests\Sieves\Utils;
+namespace Osteel\Duct\Tests\Services;
 
-use Osteel\Duct\Sieves\Utils\PathGenerator;
+use Osteel\Duct\Services\PathGenerator;
 use Osteel\Duct\Tests\TestCase;
 
 class PathGeneratorTest extends TestCase
@@ -15,7 +15,7 @@ class PathGeneratorTest extends TestCase
         parent::setUp();
 
         $this->generator = new PathGenerator();
-        $this->directory = sprintf('%s/../../data/img/jpg', __DIR__);
+        $this->directory = sprintf('%s/../data/img/jpg', __DIR__);
     }
 
     public function fileProvider(): array

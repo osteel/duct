@@ -4,7 +4,7 @@ namespace Osteel\Duct\Services;
 
 use Symfony\Component\Console\Style\SymfonyStyle;
 
-class Interpreter extends SymfonyStyle
+class Reporter extends SymfonyStyle
 {
     /**
      * Ask a question and return the input value.
@@ -25,7 +25,10 @@ class Interpreter extends SymfonyStyle
         $this->block(sprintf(' ℹ️   %s', $message), null, 'fg=white;bg=blue', ' ', true);
     }
 
-    public function work(string $message): void
+    /**
+     * Formats a command action.
+     */
+    public function action(string $message): void
     {
         $this->block(sprintf(' ⚙️  %s', $message), null, 'fg=white;bg=cyan', ' ', true);
     }

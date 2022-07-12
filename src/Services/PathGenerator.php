@@ -1,6 +1,6 @@
 <?php
 
-namespace Osteel\Duct\Sieves\Utils;
+namespace Osteel\Duct\Services;
 
 class PathGenerator
 {

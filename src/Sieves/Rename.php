@@ -2,40 +2,51 @@
 
 namespace Osteel\Duct\Sieves;
 
+use Closure;
 use DateTime;
 use Exception;
 use Illuminate\Support\Str;
 use Intervention\Image\ImageManager;
-use Osteel\Duct\Services\Interpreter;
-use Osteel\Duct\Sieves\Utils\ExtensionFilter;
-use Osteel\Duct\Sieves\Utils\PathGenerator;
-use Osteel\Duct\ValueObjects\Directory;
+use Osteel\Duct\Services\PathGenerator;
 use SplFileInfo;
+use Throwable;
 
 class Rename extends Sieve
 {
-    private array $types;
-    private string $pattern;
+    private static array $extensionMap = [
+        'heic' => ['heic', 'heif'],
+        'heif' => ['heic', 'heif'],
+        'jpeg' => ['jpg', 'jpeg'],
+        'jpg'  => ['jpg', 'jpeg'],
+    ];
 
-    public function __construct(private Interpreter $interpreter, array $options)
+    private readonly array $types;
+    private readonly string $pattern;
+
+    protected function setOptions(array $options = []): static
     {
         // @TODO check that the right options are provided and that the formats are supported
         $this->types   = $options['types'];
         $this->pattern = $options['pattern'];
+
+        return $this;
     }
 
-    public function filter(Directory $directory): int
+    public function getScreen(): Closure|null
     {
-        $filtered  = new ExtensionFilter($directory->iterator, $this->types);
-        $manager   = new ImageManager(['driver' => 'imagick']);
-        $generator = new PathGenerator();
+        $extensions = [];
 
-        if (($count = iterator_count($filtered)) === 0) {
-            return $count;
+        foreach ($this->types as $extension) {
+            $extensions = array_merge($extensions, self::$extensionMap[$extension] ?? [$extension]);
         }
 
-        $this->interpreter->progressStart($count);
-        $filtered->rewind();
+        return fn (SplFileInfo $file) => in_array(strtolower($file->getExtension()), $extensions);
+    }
+
+    public function getProcess(): Closure
+    {
+        $manager   = new ImageManager(['driver' => 'imagick']);
+        $generator = new PathGenerator();
 
         // @TODO handle this better
         if (preg_match('/^(\w*):?(.*)$/', $this->pattern, $matches) === false) {
@@ -44,11 +55,17 @@ class Rename extends Sieve
 
         [, $exif, $format] = $matches;
 
-        /** @var SplFileInfo */
-        foreach ($filtered as $file) {
+        // @TODO handle this better
+        try {
+            $format ? (new DateTime())->format($format) : null;
+        } catch (Throwable) {
+            throw new Exception('Invalid format');
+        }
+
+        return function (SplFileInfo $file) use ($manager, $generator, $exif, $format) {
             // @TODO handle this better
             if (empty($filename = $manager->make($file->getPathname())->exif(Str::studly(strtolower($exif))))) {
-                continue;
+                return;
             }
 
             // @TODO handle exceptions
@@ -60,12 +77,6 @@ class Rename extends Sieve
 
             // @TODO handle exceptions
             rename($file->getPathname(), $path);
-
-            $this->interpreter->progressAdvance();
-        }
-
-        $this->interpreter->progressFinish();
-
-        return $count;
+        };
     }
 }

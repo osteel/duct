@@ -2,22 +2,53 @@
 
 namespace Osteel\Duct\Sieves;
 
+use Closure;
 use Illuminate\Support\Str;
-use Osteel\Duct\Services\Interpreter;
-use Osteel\Duct\ValueObjects\Directory;
 
 abstract class Sieve
 {
-    public static function make(string $key, Interpreter $interpreter, array $options = []): Sieve
+    protected function __construct(array $options = [])
+    {
+    }
+
+    public static function make(string $key, $options = []): Sieve
     {
         // @TODO check if class exists first and clean this up
         $class = sprintf('Osteel\\Duct\\Sieves\\%s', Str::studly($key));
 
-        return new $class($interpreter, $options);
+        return (new $class())->setOptions($options);
+    }
+
+    protected function setOptions(array $options = []): static
+    {
+        return $this;
     }
 
     /**
-     * Apply the sieve and return the number of processed files.
+     * Optional closure returning a boolean indicating whether the current file should be processed.
+     *
+     * Minimalist example:
+     *
+     * ```
+     * public function getScreen(): Closure|null
+     * {
+     *     return fn (SplFileInfo $file) => true;
+     * }
+     * ```
      */
-    abstract public function filter(Directory $directory): int;
+    abstract public function getScreen(): Closure|null;
+
+    /**
+     * Closure processing a single file.
+     *
+     * Minimalist example:
+     *
+     * ```
+     * public function getProcess(): Closure
+     * {
+     *     return fn (SplFileInfo $file) => unlink($file->getPathname());
+     * }
+     * ```
+     */
+    abstract public function getProcess(): Closure;
 }

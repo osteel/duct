@@ -2,11 +2,11 @@
 
 namespace Osteel\Duct\Commands;
 
+use Osteel\Duct\Services\Assistant\Assistant;
+use Osteel\Duct\Services\Configurator\Configurator;
 use Osteel\Duct\Services\Configurator\Exceptions\MissingConfiguration;
-use Osteel\Duct\Services\Interpreter;
-use Osteel\Duct\Sieves\Sieve;
-use Osteel\Duct\ValueObjects\Directory;
-use Osteel\Duct\ValueObjects\Treatment;
+use Osteel\Duct\Services\Operator\Operator;
+use Osteel\Duct\Services\Reporter;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
@@ -51,27 +51,22 @@ class Apply extends Command
      */
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
-        $interpreter = new Interpreter($input, $output);
-
         try {
-            $treatment = Treatment::make($input->getArgument('treatment'), $interpreter);
-            $directory = Directory::make($input->getArgument('directory'), (bool) $input->getOption('recursive'));
+            $configurator = new Configurator();
+            $assistant    = new Assistant($configurator->load('TREATMENTS_LOCATION'));
+            $reporter     = new Reporter($input, $output);
+            $operator     = new Operator($reporter);
 
-            $treatment->sieves->each(function (Sieve $sieve) use ($directory, $interpreter) {
-                $class = explode('\\', $sieve::class);
+            $treatment = $assistant->prepare($input->getArgument('treatment'));
+            $directory = $assistant->open($input->getArgument('directory'), (bool) $input->getOption('recursive'));
 
-                $interpreter->work(sprintf('Applying sieve %s...', array_pop($class)));
-
-                $count = $sieve->filter($directory);
-
-                $interpreter->success(sprintf('%s files successfully processed!', $count));
-            });
+            $operator->apply($treatment, $directory);
         } catch (MissingConfiguration $exception) {
-            $interpreter->error('Please run "duct config"');
+            $reporter->error('Please run "duct config"');
 
             return Command::FAILURE;
         } catch (Throwable $exception) {
-            $interpreter->error($exception->getMessage());
+            $reporter->error($exception->getMessage());
 
             return Command::FAILURE;
         }

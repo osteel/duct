@@ -2,51 +2,51 @@
 
 namespace Osteel\Duct\Sieves;
 
+use Closure;
 use Intervention\Image\ImageManager;
-use Osteel\Duct\Services\Interpreter;
-use Osteel\Duct\Sieves\Utils\ExtensionFilter;
-use Osteel\Duct\Sieves\Utils\PathGenerator;
-use Osteel\Duct\ValueObjects\Directory;
+use Osteel\Duct\Services\PathGenerator;
 use SplFileInfo;
 
-class Convert extends Sieve
+final class Convert extends Sieve
 {
-    private string $from;
-    private string $to;
+    private static array $extensionMap = [
+        'heic' => ['heic', 'heif'],
+        'heif' => ['heic', 'heif'],
+        'jpeg' => ['jpg', 'jpeg'],
+        'jpg'  => ['jpg', 'jpeg'],
+    ];
 
-    public function __construct(private Interpreter $interpreter, array $options)
+    private readonly string $from;
+    private readonly string $to;
+
+    protected function setOptions(array $options = []): static
     {
         // @TODO check that the right options are provided and that the formats are supported
         $this->from = $options['from'];
         $this->to   = $options['to'];
+
+        return $this;
     }
 
-    public function filter(Directory $directory): int
+    // @TODO support multiple extensions
+    public function getScreen(): Closure|null
     {
-        $filtered = new ExtensionFilter($directory->iterator, [$this->from]);
-        $manager  = new ImageManager(['driver' => 'imagick']);
+        $extensions = self::$extensionMap[$this->from] ?? [$this->from];
+
+        return fn (SplFileInfo $file) => in_array(strtolower($file->getExtension()), $extensions);
+    }
+
+    public function getProcess(): Closure
+    {
+        $manager   = new ImageManager(['driver' => 'imagick']);
         $generator = new PathGenerator();
 
-        if (($count = iterator_count($filtered)) === 0) {
-            return $count;
-        }
-
-        $this->interpreter->progressStart($count);
-        $filtered->rewind();
-
-        /** @var SplFileInfo */
-        foreach ($filtered as $file) {
+        return function (SplFileInfo $file) use ($manager, $generator) {
             $path = $generator->uniquePath($file->getPath(), pathinfo($file->getFilename(), PATHINFO_FILENAME), $this->to);
 
             // @TODO handle exceptions
             $manager->make($file->getPathname())->save($path);
             unlink($file->getPathname());
-
-            $this->interpreter->progressAdvance();
-        }
-
-        $this->interpreter->progressFinish();
-
-        return $count;
+        };
     }
 }
