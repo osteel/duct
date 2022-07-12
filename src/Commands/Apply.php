@@ -51,10 +51,11 @@ class Apply extends Command
      */
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
+        $reporter = new Reporter($input, $output);
+
         try {
             $configurator = new Configurator();
             $assistant    = new Assistant($configurator->load('TREATMENTS_LOCATION'));
-            $reporter     = new Reporter($input, $output);
             $operator     = new Operator($reporter);
 
             $treatment = $assistant->prepare($input->getArgument('treatment'));
