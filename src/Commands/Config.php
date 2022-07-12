@@ -4,13 +4,12 @@ namespace Osteel\Duct\Commands;
 
 use Exception;
 use Osteel\Duct\Services\Configurator\Configurator;
-use Osteel\Duct\Services\Interpreter;
+use Osteel\Duct\Services\Reporter;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Process\Exception\ProcessFailedException;
 use Symfony\Component\Process\Process;
-use Throwable;
 
 class Config extends Command
 {
@@ -37,11 +36,11 @@ class Config extends Command
      */
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
-        $interpreter  = new Interpreter($input, $output);
+        $reporter     = new Reporter($input, $output);
         $configurator = new Configurator();
 
-        $treatmentsLocation = $this->getTreatmentsLocation($configurator, $interpreter);
-        $editor             = $this->getEditor($configurator, $interpreter);
+        $treatmentsLocation = $this->getTreatmentsLocation($configurator, $reporter);
+        $editor             = $this->getEditor($configurator, $reporter);
 
         $process = new Process([$editor, $treatmentsLocation]);
         $process->setTty(true);
@@ -51,24 +50,24 @@ class Config extends Command
             throw new ProcessFailedException($process);
         }
 
-        $interpreter->success('Configuration successfully updated');
+        $reporter->success('Configuration successfully updated');
 
         return Command::SUCCESS;
     }
 
-    private function getTreatmentsLocation(Configurator $configurator, Interpreter $interpreter): string
+    private function getTreatmentsLocation(Configurator $configurator, Reporter $reporter): string
     {
         try {
             $treatmentsLocation = $configurator->load('TREATMENTS_LOCATION');
         } catch (Exception) {
-            $treatmentsLocation = $interpreter->question(
+            $treatmentsLocation = $reporter->question(
                 'Where to save treatments?',
                 sprintf('%s/config', dirname(__DIR__, 2))
             );
 
             if (! is_dir($treatmentsLocation)) {
-                $interpreter->error('Invalid directory');
-                return $this->getTreatmentsLocation($configurator, $interpreter);
+                $reporter->error('Invalid directory');
+                return $this->getTreatmentsLocation($configurator, $reporter);
             }
 
             $treatmentsLocation .= '/treatments.yml';
@@ -79,12 +78,12 @@ class Config extends Command
         return $treatmentsLocation;
     }
 
-    private function getEditor(Configurator $configurator, Interpreter $interpreter): string
+    private function getEditor(Configurator $configurator, Reporter $reporter): string
     {
         try {
             $editor = $configurator->load('EDITOR');
         } catch (Exception) {
-            $editor = $interpreter->question('What editor to use?', 'vi');
+            $editor = $reporter->question('What editor to use?', 'vi');
 
             $configurator->save('EDITOR', $editor);
         }
