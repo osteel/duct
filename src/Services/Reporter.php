@@ -30,7 +30,7 @@ class Reporter extends SymfonyStyle
      */
     public function action(string $message): void
     {
-        $this->block(sprintf(' ⚙️  %s', $message), null, 'fg=white;bg=cyan', ' ', true);
+        $this->block(sprintf(' ⚙️   %s', $message), null, 'fg=white;bg=cyan', ' ', true);
     }
 
     /**
@@ -53,5 +53,16 @@ class Reporter extends SymfonyStyle
     public function success($message)
     {
         $this->block(sprintf(' 🎉  %s', $message), null, 'fg=white;bg=green', ' ', true);
+    }
+
+    /**
+     * {@inheritdoc}
+     *
+     * @param  string $message
+     * @return void
+     */
+    public function warning($message)
+    {
+        $this->block(sprintf(' 😲  %s', $message), null, 'fg=white;bg=yellow', ' ', true);
     }
 }

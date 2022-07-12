@@ -53,7 +53,7 @@ final class Operator
     private function report(int $total, array $errors = []): void
     {
         if ($total === 0) {
-            $this->reporter->comment('No file to process!');
+            $this->reporter->comment('No files to process!');
         } else {
             $this->reporter->success(sprintf('%s files processed!', $total));
         }
